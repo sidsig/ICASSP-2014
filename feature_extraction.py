@@ -32,12 +32,13 @@ class FeatExtraction():
     	self.dataset_dir = dataset_dir
         self.list_dir = os.path.join(self.dataset_dir,'lists')
         self.get_filenames()
-        self.feat_dir = 
+        self.feat_dir = os.path.join(self.dataset_dir,'features')
         self.make_feat_dir()
         self.h5_filename = os.path.join(self.feat_dir,'feats.h5')
         self.make_h5()
         self.setup_h5()
         self.extract_features()
+        self.close_h5()
 
 
     def get_filenames(self,):
@@ -74,7 +75,7 @@ class FeatExtraction():
 
 
     def extract_features(self,):
-    	for i in xrange(1,self.num_files):
+        for i in xrange(1,self.num_files):
     		filename = self.filenames[i]
     		x = read_wav(filename)
     		spec_x = calc_specgram(x,22050,1024)
@@ -82,8 +83,12 @@ class FeatExtraction():
     		self.h5_x.append(spec_x)
     		self.h5_filenames.append([filename])
 
+    def close_h5(self,):
+        self.h5.flush()
+        self.h5.close()
+        
 if __name__ == '__main__':
-	test = FeatExtraction('/homes/sss31/datasets/gtzan/')
+	test = FeatExtraction('/home/siggy/PhD/gtzan/')
     # filename = '/home/siggy/PhD/gtzan/lists/audio_files.txt'
     # file_list = [l.strip() for l in open(filename,'r').readlines()]
     # data = read_wav(file_list[0])
