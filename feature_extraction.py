@@ -89,8 +89,4 @@ class FeatExtraction():
         
 if __name__ == '__main__':
 	test = FeatExtraction('/home/siggy/PhD/gtzan/')
-    # filename = '/home/siggy/PhD/gtzan/lists/audio_files.txt'
-    # file_list = [l.strip() for l in open(filename,'r').readlines()]
-    # data = read_wav(file_list[0])
-    # test = SpecGram(data,22050,1024)
-    # pdb.set_trace()
+  
