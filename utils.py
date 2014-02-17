@@ -1,5 +1,4 @@
 import os
-import pdb
 
 def getFiles(root_dir,ext='.mp3',verbose=True) :
     """
@@ -24,3 +23,14 @@ def parseFile(filePath):
     root,file=os.path.split(filePath)
     fileName,fileExt=os.path.splitext(file)
     return (root,fileName,fileExt)
+
+def read_file(filename):
+    """
+    Loads a file into a list
+    """
+    file_list=[l.strip() for l in open(filename,'r').readlines()]
+    return file_list
+
+def writeFile(dataList,filename):
+    with open(filename,'w') as f:
+        f.writelines(dataList)
