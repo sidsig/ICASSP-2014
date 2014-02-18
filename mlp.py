@@ -1,3 +1,9 @@
+"""
+Script for building theano graph for MLP
+Siddharth Sigia
+Feb,2014
+C4DM
+"""
 import sys
 import os
 import numpy
@@ -64,8 +70,7 @@ class MLP():
 		self.cost = T.mean(L)
 		return [self.x,self.y],self.cost,self.params
 
-
-
-test = MLP()
-_,_,_ = test.build_graph()
-pdb.set_trace()
+if __name__=='__main__':
+	test = MLP()
+	_,_,_ = test.build_graph()
+	pdb.set_trace()

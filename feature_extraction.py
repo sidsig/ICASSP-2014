@@ -1,3 +1,9 @@
+"""
+Feature extraction.
+Siddharth Sigia
+Feb,2014
+C4DM
+"""
 import numpy
 import subprocess
 import sys
