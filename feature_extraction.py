@@ -88,5 +88,5 @@ class FeatExtraction():
         self.h5.close()
         
 if __name__ == '__main__':
-	test = FeatExtraction('/home/siggy/PhD/gtzan/')
+	test = FeatExtraction('/homes/sss31/datasets/gtzan/')
   
