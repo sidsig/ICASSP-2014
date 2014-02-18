@@ -13,7 +13,7 @@ from theano.tensor.shared_randomstreams import RandomStreams
 import pdb
 
 class MLP():
-	def __init__(self,n_inputs=513,n_outputs=10,n_hidden=[50,50,50],activation='sigmoid'):
+	def __init__(self,n_inputs=513,n_outputs=10,n_hidden=[50,50,50],activation='sigmoid',output_layer='sigmoid'):
 
 		self.x = T.matrix('x')
 		self.y = T.matrix('y')
@@ -24,6 +24,7 @@ class MLP():
 		self.sizes = [self.n_inputs] + self.n_hidden + [self.n_outputs]
 		self.numpy_rng = numpy.random.RandomState(123)
 		self.theano_rng = RandomStreams(self.numpy_rng.randint(2**10))
+		self.output_layer = output_layer
 		self.initialize_params()
 		self.set_activation(activation)
 
@@ -53,7 +54,7 @@ class MLP():
 			print 'Activation must be sigmoid or ReLU. Quitting'
 			sys.exit()
 
-	def fprop(self,inputs,output_layer='sigmoid'):
+	def fprop(self,inputs,output_layer=self.output_layer):
 	 	h = []
 	 	h.append(self.activation(T.dot(inputs, self.W[0]) + self.b[0]))
 	 	for i in xrange(1,len(self.n_hidden)):
@@ -62,6 +63,9 @@ class MLP():
 	 		h.append(T.nnet.sigmoid(T.dot(h[-1], self.W[-1]) + self.b[-1]))
 	 	elif output_layer=='softmax':
 	 		h.append(T.nnet.softmax(T.dot(h[-1], self.W[-1]) + self.b[-1]))
+	 	else:
+	 		print 'Output layer must be either sigmoid or softmax. Quitting.'
+	 		sys.exit()
 	 	return h[-1]
 
 	def build_graph(self,):

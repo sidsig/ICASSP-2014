@@ -10,7 +10,7 @@ from utils import *
 import pdb
 
 class PreProcessor():
-	def __init__(self,feat_file,):
+	def __init__(self,dataset_dir,):
 		self.dataset_dir = dataset_dir
 		self.feat_dir = os.path.join(self.dataset_dir,'features')
 		self.list_dir = os.path.join(self.dataset_dir,'lists')
@@ -81,10 +81,11 @@ class PreProcessor():
 		self.data[split] = data
 		self.targets[split] = targets
 
-	def prepare_fold(self,train_list,valid_list,test_list):
+	def prepare_fold(self,train_list_file,valid_list_file,test_list_file):
 		self.lists = {}
 		self.data = {}
 		self.targets = {}
+		[train_list,valid_list,test_list] = self.get_fold_lists(train_list_file,valid_list_file,test_list_file)
 		self.lists['train'] = train_list
         self.lists['valid'] = valid_list
         self.lists['test'] = test_list
@@ -98,10 +99,10 @@ class PreProcessor():
     		targets.append(self.ground_truth[filename])
     	return numpy.array(targets)
 
-    def get_fold_lists(self, fold_i):
-        return [self.parse_list(self.list_files['train'][fold_i]),
-                self.parse_list(self.list_files['valid'][fold_i]),
-                self.parse_list(self.list_files['test'][fold_i])]
+    def get_fold_lists(self, train_list_file,valid_list_file,test_list_file):
+        return [self.parse_list(train_list_file),
+                self.parse_list(valid_list_file),
+                self.parse_list(test_list_file)]
 
     def parse_list(self, list_file):
         if list_file is not None:
