@@ -37,8 +37,8 @@ class trainer():
 		train_set = Dataset([self.data['train']],batch_size=20,targets=[self.targets['train']])
 		print 'Initializing valid dataset.'
 		valid_set = Dataset([self.data['valid']],batch_size=20,targets=[self.targets['valid']])
-		self.optimizer = SGD_Optimizer(self.model.params,[self.model.x,self.model.y],self.model.cost)
-		self.optimizer.train(train_set,valid_set,learning_rate=0.1,num_epochs=200,save=True)
+		self.optimizer = SGD_Optimizer(self.model.params,[self.model.x,self.model.y],[self.model.cost,self.model.acc])
+		self.optimizer.train(train_set,valid_set,learning_rate=0.1,num_epochs=200,save=True,)
 
 if __name__=='__main__':
 	test = trainer('/homes/sss31/datasets/gtzan/','/homes/sss31/datasets/gtzan/lists/train_1_of_1.txt',
