@@ -6,7 +6,7 @@ import pdb
 class Dataset:
   '''Slices, shuffles and manages a small dataset for the HF optimizer.'''
 
-  def __init__(self, data, batch_size, number_batches,targets=None):
+  def __init__(self, data, batch_size, number_batches=None,targets=None):
     '''SequenceDataset __init__
 
   data : list of lists of numpy arrays

@@ -27,6 +27,7 @@ class MLP():
 		self.output_layer = output_layer
 		self.initialize_params()
 		self.set_activation(activation)
+		self.build_graph()
 
 	def initialize_params(self,):
 		self.W = []
@@ -54,7 +55,7 @@ class MLP():
 			print 'Activation must be sigmoid or ReLU. Quitting'
 			sys.exit()
 
-	def fprop(self,inputs,output_layer=self.output_layer):
+	def fprop(self,inputs,output_layer='sigmoid'):
 	 	h = []
 	 	h.append(self.activation(T.dot(inputs, self.W[0]) + self.b[0]))
 	 	for i in xrange(1,len(self.n_hidden)):
@@ -69,10 +70,10 @@ class MLP():
 	 	return h[-1]
 
 	def build_graph(self,):
-		self.z = self.fprop(self.x)
+		self.z = self.fprop(self.x,output_layer='sigmoid')
 		L = -T.sum(self.z*T.log(self.y) + (1-self.z)*T.log(1-self.y),axis=1)
 		self.cost = T.mean(L)
-		return [self.x,self.y],self.cost,self.params
+		#return [self.x,self.y],self.cost,self.params
 
 if __name__=='__main__':
 	test = MLP()

@@ -67,7 +67,7 @@ class FeatExtraction():
     		self.h5 = tables.openFile(self.h5_filename,'a')
 
     def setup_h5(self,):
-    	filename = self.filenames[8]
+    	filename = self.filenames[0]
     	x = read_wav(filename)
     	spec_x = calc_specgram(x,22050,1024)
     	spec_x = make_4tensor(spec_x)
@@ -82,12 +82,13 @@ class FeatExtraction():
 
     def extract_features(self,):
         for i in xrange(1,self.num_files):
-    		filename = self.filenames[i]
-    		x = read_wav(filename)
-    		spec_x = calc_specgram(x,22050,1024)
-    		spec_x = make_4tensor(spec_x)
-    		self.h5_x.append(spec_x)
-    		self.h5_filenames.append([filename])
+    	    filename = self.filenames[i]
+            print 'Filename: ',filename
+    	    x = read_wav(filename)
+    	    spec_x = calc_specgram(x,22050,1024)
+    	    spec_x = make_4tensor(spec_x)
+    	    self.h5_x.append(spec_x)
+    	    self.h5_filenames.append([filename])
 
     def close_h5(self,):
         self.h5.flush()
