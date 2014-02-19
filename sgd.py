@@ -22,6 +22,7 @@ class SGD_Optimizer():
         self.grad_inputs = self.inputs + [self.lr_theano]
         self.gparams = T.grad(self.cost,self.params,consider_constant=self.consider_constant)
         updates = dict((i, i - self.lr_theano*j) for i, j in zip(self.params, self.gparams))
+        self.calc_cost = theano.function(self.inputs,self.cost)
         if self.updates_old:
             self.updates_old.update(updates)
         else:
@@ -35,14 +36,13 @@ class SGD_Optimizer():
     def train(self,train_set,valid_set=None,learning_rate=0.1,num_epochs=500,save=False,output_folder=None,lr_update=None):
         best_cost = numpy.inf
         self.init_lr = learning_rate
-        self.lr = learning_rate
+        self.lr = numpy.array(learning_rate)
         try:
             for u in xrange(num_epochs):
                 cost = []
                 for i in train_set.iterate(True): 
-                    pdb.set_trace()
-                    i.append(self.lr)
-                    cost.append(self.f(*i))
+                    inputs = i + [self.lr]
+                    cost.append(self.f(*inputs))
                 print 'Epoch %i, cost=' %(u+1), numpy.mean(cost, axis=0)
                 this_cost = numpy.absolute(numpy.mean(cost, axis=0))
                 if this_cost < best_cost:

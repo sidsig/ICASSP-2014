@@ -71,7 +71,9 @@ class MLP():
 
 	def build_graph(self,):
 		self.z = self.fprop(self.x,output_layer='sigmoid')
-		L = -T.sum(self.z*T.log(self.y) + (1-self.z)*T.log(1-self.y),axis=1)
+		#L = -T.sum(self.z*T.log(self.y) + (1-self.z)*T.log(1-self.y),axis=1)
+		L = -T.sum(self.y*T.log(self.z) + (1-self.y)*T.log(1-self.z),axis=1)
+		#L = T.sum((self.z-self.y)**2,axis=1)
 		self.cost = T.mean(L)
 		#return [self.x,self.y],self.cost,self.params
 
