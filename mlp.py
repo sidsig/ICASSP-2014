@@ -13,8 +13,7 @@ from theano.tensor.shared_randomstreams import RandomStreams
 import pdb
 
 class MLP():
-	def __init__(self,n_inputs=513,n_outputs=10,n_hidden=[50,50,50],activation='sigmoid',output_layer='sigmoid'):
-
+	def __init__(self,n_inputs=513,n_outputs=10,n_hidden=[50,50,50],activation='sigmoid',output_layer='sigmoid',dropout_rates=None):
 		self.x = T.matrix('x')
 		self.y = T.matrix('y')
 		self.n_layers = len(n_hidden)
@@ -25,9 +24,15 @@ class MLP():
 		self.numpy_rng = numpy.random.RandomState(123)
 		self.theano_rng = RandomStreams(self.numpy_rng.randint(2**10))
 		self.output_layer = output_layer
+		if dropout_rates is not None:
+			assert len(dropout_rates)==len(n_hidden), "dropout_rates masks must be specified for each of the layers."
+			self.dropout_rates = dropout_rates
 		self.initialize_params()
 		self.set_activation(activation)
-		self.build_graph()
+		if not self.dropout_rates:
+			self.build_graph()
+		else:
+			self.build_graph_dropout()
 
 	def initialize_params(self,):
 		self.W = []
@@ -69,6 +74,27 @@ class MLP():
 	 		sys.exit()
 	 	return h[-1]
 
+
+	def fprop_dropout(self,inputs,output_layer='sigmoid'):
+		h = []
+		r = 1./(1-self.dropout_rates[0])
+		mask = T.cast(self.theano_rng.binomial(size=inputs.shape,n=1,p=1-self.dropout_rates[0]),theano.config.floatX) 
+		corr_input = inputs * mask
+		h.append(self.activation(r * T.dot(corr_input,self.W[0]) + self.b[0]))
+		for i in xrange(1,len(self.n_hidden)):
+	 		r = 1./(1-self.dropout_rates[i])
+	 		mask = T.cast(self.theano_rng.binomial(size=h[i-1].shape,n=1,p=1-self.dropout_rates[i]),theano.config.floatX) 
+	 		corr_input = h[i-1] * mask
+	 		h.append(self.activation(r * T.dot(corr_input,self.W[i]) + self.b[i]))
+	 	if output_layer=='sigmoid':
+	 		h.append(T.nnet.sigmoid(T.dot(h[-1], self.W[-1]) + self.b[-1]))
+	 	elif output_layer=='softmax':
+	 		h.append(T.nnet.softmax(T.dot(h[-1], self.W[-1]) + self.b[-1]))
+	 	else:
+	 		print 'Output layer must be either sigmoid or softmax. Quitting.'
+	 		sys.exit()
+	 	return h[-1]
+
 	def build_graph(self,):
 		self.z = self.fprop(self.x,output_layer='sigmoid')
 		#L = -T.sum(self.z*T.log(self.y) + (1-self.z)*T.log(1-self.y),axis=1)
@@ -79,7 +105,14 @@ class MLP():
 		self.acc = T.neq(T.argmax(self.z,axis=1),T.argmax(self.y,axis=1)).mean()
 		#return [self.x,self.y],self.cost,self.params
 
+	def build_graph_dropout(self,):
+		self.z_dropout = self.fprop_dropout(self.x,output_layer='sigmoid')
+		self.z = self.fprop(self.x,output_layer='sigmoid')
+		L = -T.sum(self.y*T.log(self.z_dropout) + (1-self.y)*T.log(1-self.z_dropout),axis=1)
+		self.cost = T.mean(L)
+		self.acc = T.neq(T.argmax(self.z,axis=1),T.argmax(self.y,axis=1)).mean()
+
 if __name__=='__main__':
 	test = MLP()
 	_,_,_ = test.build_graph()
-	pdb.set_trace()
+	

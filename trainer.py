@@ -29,7 +29,7 @@ class trainer():
 		self.targets = self.preprocessor.targets
 		print 'Building model.'
 		self.model = MLP(n_inputs=513,n_outputs=10,n_hidden=[50,50,50],
-						 activation='sigmoid',output_layer='sigmoid')
+						 activation='sigmoid',output_layer='sigmoid',dropout_rates=[0.2,0.5,0.5])
 
 	def train(self,):
 		print 'Starting training.'

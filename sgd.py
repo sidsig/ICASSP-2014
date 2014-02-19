@@ -4,14 +4,18 @@ import theano
 import theano.tensor as T
 import cPickle
 import os
+from theano.compat.python2x import OrderedDict
 import pdb
 
 
 class SGD_Optimizer():
-    def __init__(self,params,inputs,costs,updates_old=None,monitor=None,consider_constant=[]):
+    def __init__(self,params,inputs,costs,updates_old=None,consider_constant=[]):
         """
         params: parameters of the model
-
+        inputs: list of symbolic inputs to the graph
+        costs: list of costs to be evaluated. The first element MUST be the objective.
+        updates_old: OrderedDict from previous graphs that need to be accounted for by SGD, typically when scan is used.
+        consider_constant: list of theano variables that are passed on to the grad method. Typically RBM.
         """
         self.params = params
         self.inputs = inputs
@@ -19,7 +23,6 @@ class SGD_Optimizer():
         self.num_costs = len(costs)
         assert (isinstance(costs,list)), "The costs given to the SGD class must be a list, even for one element."
         self.updates_old = updates_old
-        self.monitor = monitor
         self.consider_constant = consider_constant
         self.build_train_fn()
 
@@ -27,17 +30,15 @@ class SGD_Optimizer():
         self.lr_theano = T.scalar('lr')
         self.grad_inputs = self.inputs + [self.lr_theano]
         self.gparams = T.grad(self.costs[0],self.params,consider_constant=self.consider_constant)
-        updates = dict((i, i - self.lr_theano*j) for i, j in zip(self.params, self.gparams))
+        updates = OrderedDict((i, i - self.lr_theano*j) for i, j in zip(self.params, self.gparams))
         self.calc_cost = theano.function(self.inputs,self.costs)
         if self.updates_old:
             self.updates_old.update(updates)
         else:
-            self.updates_old = {}
+            self.updates_old = OrderedDict()
             self.updates_old.update(updates)
-        if self.monitor:
-            self.f = theano.function(self.grad_inputs, self.monitor, updates=self.updates_old)
-        else:
-            self.f = theano.function(self.grad_inputs, self.costs, updates=self.updates_old)
+
+        self.f = theano.function(self.grad_inputs, self.costs, updates=self.updates_old)
 
     def train(self,train_set,valid_set=None,learning_rate=0.1,num_epochs=500,save=False,output_folder=None,lr_update=None):
         self.best_cost = numpy.inf
@@ -62,7 +63,7 @@ class SGD_Optimizer():
 
                 if not valid_set:
                     this_cost = numpy.absolute(numpy.mean(cost, axis=0))
-                    if this_cost < best_cost:early
+                    if this_cost < best_cost:
                         best_cost = this_cost
                         print 'Best Params!'
                         if save:
