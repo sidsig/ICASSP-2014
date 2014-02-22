@@ -9,7 +9,7 @@ import pdb
 
 
 class SGD_Optimizer():
-    def __init__(self,params,inputs,costs,updates_old=None,consider_constant=[]):
+    def __init__(self,params,inputs,costs,updates_old=None,consider_constant=[],momentum=True):
         """
         params: parameters of the model
         inputs: list of symbolic inputs to the graph
@@ -18,7 +18,12 @@ class SGD_Optimizer():
         consider_constant: list of theano variables that are passed on to the grad method. Typically RBM.
         """
         self.params = params
-        self.inputs = inputs
+        self.momentum = momentum
+        if self.momentum:
+            self.params_mom = []
+            for param in self.params:
+                param_init = theano.shared(value=numpy.zeros(param.get_value().shape,dtype=theano.config.floatX),name=param.name+'_mom')
+                self.params_mom.append(param_init)
         self.costs = costs 
         self.num_costs = len(costs)
         assert (isinstance(costs,list)), "The costs given to the SGD class must be a list, even for one element."
@@ -29,8 +34,19 @@ class SGD_Optimizer():
     def build_train_fn(self,):
         self.lr_theano = T.scalar('lr')
         self.grad_inputs = self.inputs + [self.lr_theano]
+        if self.momentum:
+            self.mom_theano = T.scalar('mom')
+            self.grad_inputs = self.grad_inputs + [self.mom_theano]
+        
         self.gparams = T.grad(self.costs[0],self.params,consider_constant=self.consider_constant)
-        updates = OrderedDict((i, i - self.lr_theano*j) for i, j in zip(self.params, self.gparams))
+        if not self.momentum:
+            updates = OrderedDict((i, i - self.lr_theano*j) for i, j in zip(self.params, self.gparams))
+        else:
+            updates = OrderedDict()
+            for param,param_mom,gparam in zip(self.params,self.params_mom,self.gparams):
+                param_new = self.mom_theano * param_mom - self.lr_theano * gparam
+                updates[param_mom] = param_new
+                updates[param] = param + param_mom
         self.calc_cost = theano.function(self.inputs,self.costs)
         if self.updates_old:
             self.updates_old.update(updates)
