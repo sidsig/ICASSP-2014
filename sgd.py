@@ -17,6 +17,7 @@ class SGD_Optimizer():
         updates_old: OrderedDict from previous graphs that need to be accounted for by SGD, typically when scan is used.
         consider_constant: list of theano variables that are passed on to the grad method. Typically RBM.
         """
+        self.inputs = inputs
         self.params = params
         self.momentum = momentum
         if self.momentum:
@@ -40,13 +41,15 @@ class SGD_Optimizer():
         
         self.gparams = T.grad(self.costs[0],self.params,consider_constant=self.consider_constant)
         if not self.momentum:
+            print 'Building SGD optimization graph without momentum'
             updates = OrderedDict((i, i - self.lr_theano*j) for i, j in zip(self.params, self.gparams))
         else:
+            print 'Building SGD optimization graph with momentum'
             updates = OrderedDict()
             for param,param_mom,gparam in zip(self.params,self.params_mom,self.gparams):
-                param_new = self.mom_theano * param_mom - self.lr_theano * gparam
-                updates[param_mom] = param_new
-                updates[param] = param + param_mom
+                param_inc = self.mom_theano * param_mom - self.lr_theano * gparam
+                updates[param_mom] = param_inc
+                updates[param] = param + param_inc
         self.calc_cost = theano.function(self.inputs,self.costs)
         if self.updates_old:
             self.updates_old.update(updates)
@@ -56,10 +59,11 @@ class SGD_Optimizer():
 
         self.f = theano.function(self.grad_inputs, self.costs, updates=self.updates_old)
 
-    def train(self,train_set,valid_set=None,learning_rate=0.1,num_epochs=500,save=False,output_folder=None,lr_update=None):
+    def train(self,train_set,valid_set=None,learning_rate=0.1,num_epochs=500,save=False,output_folder=None,lr_update=None,mom_rate=0.9):
         self.best_cost = numpy.inf
         self.init_lr = learning_rate
         self.lr = numpy.array(learning_rate)
+        self.mom_rate = mom_rate
         self.output_folder = output_folder
         self.train_set = train_set
         self.valid_set = valid_set
@@ -70,6 +74,8 @@ class SGD_Optimizer():
                 cost = []
                 for i in self.train_set.iterate(True): 
                     inputs = i + [self.lr]
+                    if self.momentum:
+                        inputs = inputs + [self.mom_rate]
                     cost.append(self.f(*inputs))
                 mean_costs = numpy.mean(cost,axis=0)
                 print '  Epoch %i   ' %(u+1)
