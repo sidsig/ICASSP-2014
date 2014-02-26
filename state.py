@@ -38,13 +38,14 @@ def get_state():
 	state['n_hidden'] = [50,50,50]
 	state['activation'] = 'sigmoid'#'ReLU'
 	state['output_layer'] = 'sigmoid'#softmax
-	state['dropout_rates'] = None#[0,0.5,0.5]
+	state['dropout_rates'] = [0,0.5,0.5]
 	state['momentum'] = False
 	state['learning_rate'] = 0.1
 	state['num_epochs'] = 200
 	state['save'] = True
 	state['output_folder'] = None
 	state['lr_update'] = False
-	state['dataset_dir'] = None #/path/to/dataset/dir
+	state['dataset_dir'] = '/homes/sss31/datasets/gtzan' #/path/to/dataset/dir
 	state['batch_size'] = 20
+	state['mom_rate'] = 0.9
 	return state

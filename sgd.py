@@ -1,10 +1,16 @@
-
+"""
+SGD optimizer class 
+Siddharth Sigtia
+Feb,2014
+C4DM
+"""
 import numpy, sys
 import theano
 import theano.tensor as T
 import cPickle
 import os
 from theano.compat.python2x import OrderedDict
+import copy
 import pdb
 
 
@@ -52,6 +58,7 @@ class SGD_Optimizer():
                 updates[param] = param + param_inc
         self.calc_cost = theano.function(self.inputs,self.costs)
         if self.updates_old:
+            updates_old = copy.copy(updates_old) #To avoid updating the model dict if updates dict belongs to model class, very unlikely case.
             self.updates_old.update(updates)
         else:
             self.updates_old = OrderedDict()

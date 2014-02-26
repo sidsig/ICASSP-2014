@@ -1,3 +1,9 @@
+"""
+Class that preprocesses the data
+Siddharth Sigtia
+Feb,2014
+C4DM
+"""
 import numpy
 import os
 import time
